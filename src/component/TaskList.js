@@ -1,7 +1,28 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button, Table } from 'react-bootstrap';
 
-const TaskList = ({ tasks, onEdit, onDelete }) => {
+const TaskList = ({ onEdit }) => {
+  const [tasks, setTasks] = useState([]);
+
+  // Fetch tasks from the backend API
+  useEffect(() => {
+    fetch('http://localhost:5000/api/tasks') // Backend API endpoint
+      .then((res) => res.json())
+      .then((data) => setTasks(data))
+      .catch((err) => console.error('Error fetching tasks:', err));
+  }, []);
+
+  const handleDelete = (id) => {
+    fetch(`http://localhost:5000/api/tasks/${id}`, {
+      method: 'DELETE',
+    })
+      .then((res) => res.json())
+      .then(() => {
+        setTasks(tasks.filter((task) => task.id !== id)); // Remove task from state
+      })
+      .catch((err) => console.error('Error deleting task:', err));
+  };
+
   return (
     <Table striped bordered hover>
       <thead>
@@ -10,7 +31,7 @@ const TaskList = ({ tasks, onEdit, onDelete }) => {
           <th>Status</th>
           <th>Due Date</th>
           <th>Priority</th>
-          <th>Comments</th>
+          <th>Description</th>
           <th>Actions</th>
         </tr>
       </thead>
@@ -26,7 +47,7 @@ const TaskList = ({ tasks, onEdit, onDelete }) => {
               <Button variant="warning" onClick={() => onEdit(task)}>
                 Edit
               </Button>{' '}
-              <Button variant="danger" onClick={() => onDelete(task.id)}>
+              <Button variant="danger" onClick={() => handleDelete(task.id)}>
                 Delete
               </Button>
             </td>

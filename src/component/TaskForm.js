@@ -23,7 +23,25 @@ const TaskForm = ({ currentTask, onSave, onClose }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSave(task);
+
+    const method = currentTask ? 'PUT' : 'POST';
+    const url = currentTask
+      ? `http://localhost:5000/api/tasks/${currentTask.id}`
+      : 'http://localhost:5000/api/tasks';
+
+    fetch(url, {
+      method: method,
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(task)
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        onSave(data); // Pass data to parent component
+        onClose(); // Close the modal
+      })
+      .catch((err) => console.error('Error saving task:', err));
   };
 
   return (
